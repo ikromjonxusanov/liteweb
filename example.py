@@ -6,7 +6,7 @@ def global_middleware(environ):
 lite = LiteWeb()
 
 
-@lite.get('/users/{pk}', middlewares=[global_middleware])
+@lite.get('/users/{pk}', middlewares=[])
 def get_users(req, res, pk):
     res.send(['Ikromjon', 'Zohid'][int(pk)])
 
@@ -16,13 +16,13 @@ def post_users(req, res):
     res.send('User created!', '201 Created')
     
 
-@lite.route('/', middlewares=[global_middleware])
+@lite.route('/', middlewares=[])
 class User:
     def __init__(self):
         pass
 
     def get(req, res):
-        res.send('User list')
+        res.render('example.html', {'name': 'Ikromjon', 'message': 'Hello, World!'})
     
     def post(req, res):
         res.send('User created!', '201 Created')

@@ -1,4 +1,5 @@
 from response import Response
+from request import Request
 from parse import parse
 import types
 import inspect 
@@ -14,26 +15,25 @@ class LiteWeb:
 
     def __call__(self, environ, start_response):
         response = Response()
-        
+        request = Request(environ)
         for middleware in self.middlewares:
             if isinstance(middleware, types.FunctionType):
-                middleware(environ)
+                middleware(request)
             else:
                 raise ValueError("Middleware have to be a function")
-            
         for path, handler_dict in self.routes.items():
-            res = parse(path, environ["PATH_INFO"])
+            res = parse(path, request.path_info)
             for request_method, handler in handler_dict.items():
-                if environ["REQUEST_METHOD"] == request_method and res:
+                if request.request_method == request_method and res:
                     route_middlewares = self.middlewares_for_routes[path][request_method]
                     
                     for middleware in route_middlewares:
                         if isinstance(middleware, types.FunctionType):
-                            middleware(environ)
+                            middleware(request)
                         else:
                             raise ValueError("Middleware have to be a function")
                     
-                    handler(environ, response, **res.named)
+                    handler(request, response, **res.named)
                     response.as_wsgi(start_response)
                     return [response.text.encode()]
                 
